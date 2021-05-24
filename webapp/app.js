@@ -6,123 +6,63 @@ const jsonParser = express.json();
 
 app.use(express.static(__dirname + "/public"));
 
-app.get("/api/users", function (req, res) {
+const getRandom = (base) => {
+  return Math.ceil(Math.random() * base);
+}
 
-  let content = fs.readFileSync("users.json", "utf8");
-  let users = JSON.parse(content);
-  res.send(users);
+//attack powers
+const HITPOWERS = {
+  head: 30,
+  body: 25,
+  foot: 20,
+};
+
+//body areas
+const BODYAREAS = ['head', 'body', 'foot'];
+
+//provide list of players
+app.get("/api/mk/players", function (req, res) {
+
+  let content = fs.readFileSync("players.json", "utf8");
+  let players = JSON.parse(content);
+  res.send(players);
 });
 
-app.get("/api/users/:id", function(req, res) {
+app.get("/api/mk/player/choose", function(req, res) {
+  let content = fs.readFileSync("players.json", "utf8");
+  let players = JSON.parse(content);
 
-  let id = req.params.id;
-  let content = fs.readFileSync("users.json", "utf8");
-  let users = JSON.parse(content);
-  let user;
-
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].id == id) {
-      user = users[i];
-      break;
-    }
-  }
-
-  if (user) {
-    res.send(user);
-  } else {
-    res.status(404).send("User isn't found");
-  }
-
+  let randomId = Math.ceil(Math.random() * (players.length - 1));
+  let player = players[randomId];
+  res.send(player);
 });
 
-app.post("/api/users", jsonParser, function (req, res) {
+app.post("/api/mk/player/fight", jsonParser, function (req, res) {
   
   if (!req.body) res.sendStatus(400);
-
-  let userName = req.body.name;
-  let userAge = req.body.age;
-  let user = {name: userName, age: userAge};
-
-  let data = fs.readFileSync("users.json", "utf8");
-  let users = JSON.parse(data);
-
-  let id = Math.max(...users.map((user) => user.id));
-  
-  if (Number.isFinite(id)) {
-    user.id = id + 1;
-  } else {
-    user.id = 1;
-  }
-  
-  users.push(user);
-
-  data = JSON.stringify(users);
-  fs.writeFileSync("users.json", data);
-  res.send(user);
-});
-
-app.delete("/api/users/:id", function (req, res) {
-
-  let id = req.params.id;
-  let data = fs.readFileSync("users.json", "utf8");
-  let users = JSON.parse(data);
-  let index = -1;
-
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].id == id) {
-      index = i;
-      break;
-    }
+  let hit = req.body.hit;
+  let defence = req.body.defence;
+  let player1 = {
+    hit,
+    defence,
+    value: getRandom(HITPOWERS[hit]),
   }
 
-  if (index > -1) {
-    let user = users.splice(index, 1)[0];
-    
-    for (let i = 0; i < users.length; i++) {
-      users[i].id = i + 1;
-    }
-    
-    let data = JSON.stringify(users);
-    fs.writeFileSync("users.json", data);
-    res.send(user);
-  } 
-  else {
-    res.status(404).send("User isn't found by ID");
-  }
-});
-
-app.put("/api/users", jsonParser, function (req, res) {
-
-  if (!req.body) res.status(400).send("Failed to change");
-  
-  let userId = req.body.id;
-  let userName = req.body.name;
-  let userAge = req.body.age;
-
-  let data = fs.readFileSync("users.json", "utf8");
-  let users = JSON.parse(data);
-  let user;
-
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].id == userId) {
-      user = users[i];
-      break;
-    }
+  let player2 = {
+    hit: BODYAREAS[getRandom(BODYAREAS.length) - 1],
+    defence: BODYAREAS[getRandom(BODYAREAS.length) - 1],
+    value: getRandom(HITPOWERS[hit]),
   }
 
-  if (user) {
-    user.age = userAge;
-    user.name = userName;
-    let data = JSON.stringify(users);
-    fs.writeFileSync("users.json", data);
-    res.send(user);
-  } 
-  else {
-    res.status(404).send(user);
-  }
+  let fight = {
+    player1, 
+    player2,
+  };
+
+  res.send(fight);
+
 });
 
 app.listen(3000, function() {
   console.log("Server started");
 });
-
