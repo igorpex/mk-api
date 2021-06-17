@@ -15,8 +15,8 @@ Back-end:
 * Players are  *player.json*;
 
 API
-/api/mk/players - provides list of players
-/api/mk/player/choose - provides one random player
-/api/mk/player/fight - provides games login based on hit and defence (where player hits and what player defences)
+* /api/mk/players - provides list of players
+* /api/mk/player/choose - provides one random player
+* /api/mk/player/fight - provides games login based on hit and defence (where player hits and what player defences)
 
 _Don't forget to add the folder with **node_modules**_
