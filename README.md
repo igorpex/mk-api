@@ -1,4 +1,5 @@
-MortalKombat learning game with NodeJS API
+MortalKombat learning game with server API on NodeJS.
+It is text game with gif pictures, not real one.
 
 Game front-end Made during JS Zar Maraphon.
 
